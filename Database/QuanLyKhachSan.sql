@@ -144,7 +144,7 @@ insert into QUANLYDICHVU values
 ('Ph008','DV001',1),('Ph008','DV002',5),('Ph008','DV010',1)
 go
 insert into DANGNHAP values
-('khuonghoang','hoanglaota'),
+('kienhoang','hoangkien'),
 ('tuananh','anhle123'),
 ('khuonglinh','linh123'),
 ('quangtruong','truong123'),
