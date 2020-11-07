@@ -157,3 +157,241 @@ alter table DICHVU add constraint PK_DV primary key (ID_DichVu)
 alter table PHONG add constraint PK_Ph primary key (ID_Phong)
 alter table DANGNHAP add constraint PK_DN primary key (Username)
 go
+alter table QUANLYDICHVU add constraint PK_CTTP primary key (ID_Phong, ID_DichVu),
+	constraint PK_CTTP_Ph foreign key(ID_Phong) references PHONG(ID_Phong),
+	constraint PK_CTTP_DV foreign key(ID_DichVu) references DICHVU(ID_DichVu)
+
+alter table QUANLYDODUNG add constraint PK_QLDD primary key (ID_Phong, ID_DoDung),
+	constraint PK_QLDD_Ph foreign key (ID_Phong) references PHONG(ID_Phong),
+	constraint PK_QLDD_DD foreign key (ID_DoDung) references DODUNG(ID_DoDung)
+	
+alter table QUANLYPHONG add constraint PK_QLP primary key (ID_Phong, ID_KhachHang),
+	constraint PK_QLP_Ph foreign key (ID_Phong) references PHONG(ID_Phong),
+	constraint PK_QLP_KH foreign key (ID_KhachHang) references KHACHHANG(ID_KhachHang)
+go
+create proc OutPutTable
+(
+	@core int
+)
+as
+begin
+	if @core=1
+		select*from KHACHHANG
+	else if @core=2
+		select*from PHONG
+	else if @core=3
+		select*from DODUNG
+	else if @core=4
+		select*from DICHVU
+	else if @core=5
+		select*from QUANLYDICHVU
+	else if @core=6
+		select*from QUANLYDODUNG
+	else if @core=7
+		select*from QUANLYPHONG
+	else 
+		select*from DANGNHAP
+end
+go
+create proc AddObject
+(
+	@core int,
+	@ID1 varchar(10),
+	@ID2 varchar(10),
+	@String nvarchar(50),
+	@Date1 date,
+	@Date2 date,
+	@Num bigint
+)
+as
+begin
+	if @core=1
+		insert into KHACHHANG
+		values (@ID1,@String,@ID2,@Num)
+	else if @core=2
+		insert into PHONG
+		values (@ID1,@ID2,@Num,@String)
+	else if @core=3
+		insert into DODUNG
+		values(@ID1,@String,@Num)
+	else if @core=4
+		insert into DICHVU
+		values(@ID1,@String,@Num)
+	else if @core=5
+		insert into QUANLYDICHVU
+		values (@ID1,@ID2,@Num)
+	else if @core=6
+		insert into QUANLYDODUNG
+		values (@ID1,@ID2,@Num)
+	else 
+		insert into QUANLYPHONG
+		values (@ID1,@ID2,@Date1,@Date2,@Num,@String)
+end
+go
+create proc EditObject
+(
+	@core int,
+	@ID1 varchar(10),
+	@ID2 varchar(10),
+	@String nvarchar(50),
+	@Date1 date,
+	@Date2 date,
+	@Num bigint
+)
+as
+begin
+	if @core=1
+		update KHACHHANG set TenKhachHang=@String, CMND=@ID2,SDT=@Num
+		where ID_KhachHang=@ID1
+	else if @core=2
+		update PHONG set TinhTrang=@ID2, GhiChu=@String ,Gia1Ngay=@Num
+		where ID_Phong=@ID1
+	else if @core=3
+		update DODUNG set TenDoDung=@String,Gia=@Num
+		where ID_DoDung=@ID1
+	else if @core=4
+		update DICHVU set TenDichVu=@String, Gia=@Num
+		where ID_DichVu=@ID1
+	else if @core=5
+		update QUANLYDICHVU set SoLuong=@Num
+		where ID_Phong=@ID1 and ID_DichVu=@ID2
+	else if @core=6
+		update QUANLYDODUNG set SoLuong=@Num
+		where ID_Phong=@ID1 and ID_DoDung=@ID2
+	else 
+		update QUANLYPHONG set NgayThue=@Date1,NgayTra=@Date2,GhiChu=@String, TongTien=@Num
+		where ID_Phong=@ID1 and ID_KhachHang=@ID2
+end
+go
+create proc DeleteObject
+(
+	@core int,
+	@ID1 nvarchar(10),
+	@ID2 nvarchar(10)
+)
+as
+begin
+	if @core=1
+		delete from KHACHHANG where ID_KhachHang=@ID1
+	else if @core=2
+		delete from PHONG where ID_Phong=@ID1
+	else if @core=3
+		delete from DODUNG where ID_DoDung=@ID1
+	else if @core=4
+		delete from DICHVU where ID_DichVu =@ID1
+	else if @core=5
+		delete from QUANLYDICHVU where ID_Phong=@ID1 and ID_DichVu=@ID2
+	else if @core=6
+		delete from QUANLYDODUNG where ID_Phong=@ID1 and ID_DoDung=@ID2
+	else 
+		delete from QUANLYPHONG where ID_Phong=@ID1 and ID_KhachHang=@ID2
+end
+go
+create proc FindObject
+(
+	@core int,
+	@Part nvarchar(50)
+)
+as
+begin
+	if @core=1
+		select*from KHACHHANG where ID_KhachHang like ('%'+@Part+'%') or TenKhachHang like ('%'+@Part+'%') or SDT like ('%'+@Part+'%')
+	else if @core=2
+		select*from PHONG where ID_Phong like ('%'+@Part+'%') or TinhTrang like ('%'+@Part+'%') or GhiChu like ('%'+@Part+'%') or Gia1Ngay like ('%'+@Part+'%')
+	else if @core=3
+		select*from DODUNG where ID_DoDung like ('%'+@Part+'%') or  TenDoDung like ('%'+@Part+'%') or Gia like ('%'+@Part+'%')
+	else if @core=4
+		select*from DICHVU where ID_DichVu like ('%'+@Part+'%') or TenDichVu like ('%'+@Part+'%') or Gia like ('%'+@Part+'%')
+	else if @core=5
+		select*from QUANLYDICHVU where ID_DichVu  like ('%'+@Part+'%') or ID_Phong like ('%'+@Part+'%') or SoLuong like ('%'+@Part+'%')
+	else if @core=6
+		select*from QUANLYDODUNG where ID_DoDung like ('%'+@Part+'%') or ID_Phong like ('%'+@Part+'%') or SoLuong  like ('%'+@Part+'%')
+	else 
+		select*from QUANLYPHONG where ID_KhachHang  like ('%'+@Part+'%') or ID_Phong  like ('%'+@Part+'%')
+end
+go
+create proc AutoCounting
+as 
+begin
+	update QUANLYPHONG set TongTien=0
+	declare pointer1 cursor scroll for select ID_Phong,NgayThue,NgayTra from QUANLYPHONG
+	declare pointer2 cursor scroll for select * from QUANLYDODUNG
+	declare pointer3 cursor scroll for select * from QUANLYDICHVU
+	declare @check int =0
+	declare @ID nvarchar(10)
+	declare @Date1 date
+	declare @Date2 date
+	declare @total bigint
+	open pointer1
+	while @check<>1
+	begin
+		fetch next from pointer1 into @ID,@Date1,@Date2
+		if @@FETCH_STATUS<>0
+		begin
+			set @check=1
+		end
+		else
+		begin
+			set @total = Convert(bigint,(select DATEDIFF(DAY,NgayThue,NgayTra) from QUANLYPHONG where ID_Phong=@ID))*(select Gia1Ngay from PHONG where ID_Phong=@ID)
+			open pointer2
+			declare @ID2_Phong nvarchar(10)
+			declare @ID2_DoDung nvarchar(10)
+			declare @count2 bigint
+			declare @check2 int=0
+			while @check2<>1
+			begin
+				fetch next from pointer2 into @ID2_Phong,@ID2_DoDung,@count2
+				if @@FETCH_STATUS<>0
+					set @check2=1
+				else
+				begin
+					if @ID2_Phong=@ID
+					begin
+						set @total = @total + (select Gia from DODUNG where ID_DoDung=@ID2_DoDung)*@count2
+					end
+				end
+			end
+			close pointer2
+			open pointer3
+			declare @ID3_Phong nvarchar(10)
+			declare @ID3_DichVu nvarchar(10)
+			declare @count3 bigint
+			declare @check3 int=0
+			while @check3<>1
+			begin
+				fetch next from pointer3 into @ID3_Phong,@ID3_DichVu,@count3 
+				if @@FETCH_STATUS<>0
+					set @check3=1
+				else
+				begin
+					if @ID3_Phong=@ID
+					begin
+						set @total=@total +(select Gia from DICHVU where ID_DichVu=@ID3_DichVu)*@count3
+					end
+				end
+			end
+			close pointer3
+			update QUANLYPHONG set TongTien=@total where ID_Phong=@ID
+		end
+	end
+	close pointer1
+	deallocate pointer1
+	deallocate pointer2
+	deallocate pointer3
+end
+go
+create trigger ThuePhong on QUANLYPHONG for insert
+as
+begin
+	declare @ID nvarchar(10)
+	select @ID=ID_Phong from inserted
+	update PHONG set TinhTrang='Busy' where ID_Phong=@ID
+end
+go
+create trigger TraPhong on QUANLYPHONG for delete
+as
+begin
+	declare @ID nvarchar(10)
+	select @ID=ID_Phong from deleted
+	update PHONG set TinhTrang='Ready' where ID_Phong=@ID
+end
